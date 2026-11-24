@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Painel GF: o jogo da gestão</title>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:#2b1055}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:#fff;font:16px/1.5 Nunito,system-ui,sans-serif;background:linear-gradient(180deg,#2b1055 0%,#7b2d8e 32%,#ff5e8a 68%,#ffb347 100%) fixed}
+main{max-width:780px;margin:0 auto;padding:16px 14px 48px;position:relative}
+h1,h2,h3,.disp{font-family:"Lilita One",system-ui,sans-serif;font-weight:400;margin:0 0 .4em;line-height:1.15}
+h2{font-size:1.3rem;color:#1d1440}
+p{margin:0 0 .8em}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
+.logo{font-size:clamp(2.6rem,11vw,4.6rem);text-align:center;color:#fff;letter-spacing:1px;text-shadow:0 4px 0 #ff3d7f,0 8px 0 #7b2d8e,0 14px 24px rgba(0,0,0,.35);margin:6px 0 2px}
+.sub{text-align:center;font-weight:800;margin-bottom:14px;text-shadow:0 2px 6px rgba(0,0,0,.4)}
+.sun{position:absolute;top:30px;left:50%;width:220px;height:220px;margin-left:-110px;border-radius:50%;background:radial-gradient(circle,#ffe29a,#ff8a5c 70%);opacity:.85;filter:blur(1px);z-index:-1}
+.palm{position:absolute;bottom:-10px;width:150px;opacity:.9;z-index:-1}
+.palm.l{left:-30px}.palm.r{right:-30px;transform:scaleX(-1)}
+.panel{background:#fff;color:#1d1440;border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 8px 0 rgba(29,20,64,.35),0 18px 30px rgba(0,0,0,.25)}
+.panel p{max-width:66ch}
+.mut{opacity:.8;font-size:.88rem}
+.row{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;margin:6px 0 10px}
+.wheel{width:112px;height:112px;border-radius:50%;background:conic-gradient(#3ddc84 0 25%,#3da5ff 0 50%,#ffb020 0 75%,#b07cff 0);border:6px solid #fff;display:grid;place-items:center;animation:spin 14s linear infinite;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.wheel i{width:44px;height:44px;border-radius:50%;background:#fff;color:#1d1440;display:grid;place-items:center;font:normal 1rem "Lilita One";animation:spin 14s linear infinite reverse}
+input{font:inherit;font-weight:700;width:100%;padding:13px 16px;border-radius:14px;border:3px solid #e6defa;background:#faf8ff;color:#1d1440;margin:6px 0 14px}
+input:focus-visible,button:focus-visible{outline:4px solid #ffcf3d;outline-offset:2px}
+button{font:inherit;cursor:pointer}
+.go{font:1.25rem "Lilita One";color:#fff;background:linear-gradient(#ff7a3d,#ff3d7f);border:0;border-radius:40px;padding:13px 30px;box-shadow:0 6px 0 #a3194f;margin:0 8px 10px 0}
+.go:active{transform:translateY(4px);box-shadow:0 2px 0 #a3194f}
+.go.alt{background:linear-gradient(#3da5ff,#7b5cff);box-shadow:0 6px 0 #3a2aa0}
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:rgba(29,20,64,.88);backdrop-filter:blur(6px);border-radius:0 0 20px 20px;padding:10px 14px 12px;margin-bottom:14px}
+.top{display:flex;justify-content:space-between;font-weight:800;margin-bottom:6px}
+.cash{font-family:"Lilita One";font-size:1.15rem;color:#ffd84a}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+.m{font-size:.8rem;font-weight:700}.m .t{height:10px;border-radius:6px;background:rgba(255,255,255,.2);overflow:hidden;margin-top:2px}
+.m .f{height:100%;border-radius:6px;transition:width .6s}
+.q{background:#fff;color:#1d1440;border-radius:22px;overflow:hidden;box-shadow:0 8px 0 rgba(29,20,64,.35),0 18px 30px rgba(0,0,0,.25);position:relative;margin-bottom:14px}
+.qh{background:var(--c);color:#fff;font:1.5rem "Lilita One";padding:10px 18px;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.qb{display:flex;gap:10px;padding:14px 14px 4px;align-items:flex-start}
+.qm{flex:0 0 78px}.tag{display:inline-block;font-size:.78rem;font-weight:800;background:#efe9ff;color:#4a2d9e;border-radius:20px;padding:2px 10px;margin-bottom:6px}
+.ops{padding:6px 14px 14px}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:#fff;color:#1d1440;border:3px solid #e6defa;border-radius:16px;padding:11px 12px;margin-bottom:9px;box-shadow:0 4px 0 #e6defa;font-weight:700}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt em{font:normal 1.05rem "Lilita One";flex:0 0 30px;height:30px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center}
+.opt small{display:block;font-weight:500;opacity:.7}
+.opt.ok{background:#3ddc84;border-color:#1b9e56;box-shadow:0 4px 0 #1b9e56;color:#06361d}
+.opt.bad{background:#ff6b6b;border-color:#c23030;box-shadow:0 4px 0 #c23030;color:#3b0707}
+.fb{margin:0 14px 14px;padding:10px 14px;border-radius:14px;background:#f3eeff;border-left:6px solid #7b5cff}
+.fb.good{border-color:#1b9e56;background:#e5faee}.fb.low{border-color:#c23030;background:#ffecec}
+.stamp{position:absolute;top:84px;left:50%;font:2.6rem "Lilita One";padding:2px 22px;border:6px solid;border-radius:14px;transform:translateX(-50%) rotate(-8deg);background:rgba(255,255,255,.92);animation:pop .5s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none}
+.stamp.yes{color:#1b9e56}.stamp.mid{color:#c27b00}.opt.mid{background:#ffd84a;border-color:#d9a400;box-shadow:0 4px 0 #d9a400;color:#4a3400}.stamp.no{color:#c23030}
+.big{font:clamp(3.4rem,16vw,6rem) "Lilita One";text-align:center;line-height:1;color:#ffd84a;text-shadow:0 5px 0 #b3590a,0 10px 18px rgba(0,0,0,.3)}
+.ctr{text-align:center}
+.rec{background:linear-gradient(90deg,#ffd84a,#ff9a3d);color:#5a2a00;border-radius:40px;padding:8px 18px;font:1.2rem "Lilita One";text-align:center;margin:0 0 14px;animation:pulse 1s infinite alternate}
+.tro{display:inline-block;font-size:2rem;animation:drop 1s cubic-bezier(.3,1.6,.5,1) both;margin-right:8px}
+.sw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.95rem}td,th{padding:7px 6px;text-align:left;border-bottom:2px solid #efe9ff}tr.me{background:#fff3c4;font-weight:800}
+.cr{vertical-align:middle;margin-right:4px}.ic{vertical-align:-4px;flex:none}
+.mas{width:100%;height:auto;overflow:visible}.mas.float{animation:flt 2.4s ease-in-out infinite}.mas.hop{animation:hop .6s ease-in-out infinite alternate}.mas.shake{animation:shk .5s ease-in-out infinite}
+body.sadmode main{filter:saturate(.55)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{from{transform:translateX(-50%) rotate(-8deg) scale(.2);opacity:0}}
+@keyframes pulse{to{transform:scale(1.04)}}
+@keyframes drop{from{transform:translateY(-80px);opacity:0}}
+@keyframes flt{50%{transform:translateY(-6px)}}
+@keyframes hop{to{transform:translateY(-12px)}}
+@keyframes shk{25%{transform:translateX(-4px) rotate(-2deg)}75%{transform:translateX(4px) rotate(2deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+html{background:linear-gradient(180deg,#5c94fc 0%,#8fc2ff 60%,#c4e6ff 100%) fixed}
+body{background:transparent}
+main{z-index:1;padding-bottom:76px}
+body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:46px;z-index:0;pointer-events:none;background:linear-gradient(#5dc450 0 8px,#2f8f33 8px 12px,transparent 12px),repeating-linear-gradient(90deg,transparent 0 46px,#7a2a00 46px 48px),repeating-linear-gradient(0deg,transparent 0 17px,#7a2a00 17px 19px),#c84c0c}
+.sky{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:-1;height:340px}
+.cl{position:absolute;left:-160px;width:110px;height:34px;background:#fff;border-radius:30px;animation:drift 50s linear infinite}
+.cl::before,.cl::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cl::before{width:52px;height:52px;top:-26px;left:16px}.cl::after{width:40px;height:40px;top:-18px;left:58px}
+.c1{top:50px}.c2{top:150px;animation-duration:70s;animation-delay:-30s;transform-origin:left}.c3{top:240px;animation-duration:90s;animation-delay:-60s}
+@keyframes drift{to{transform:translateX(calc(100vw + 320px))}}
+.logo{color:#ffd400;text-shadow:-3px -3px 0 #c8281e,3px -3px 0 #c8281e,-3px 3px 0 #c8281e,3px 3px 0 #c8281e,0 9px 0 #7a1010,0 14px 20px rgba(0,0,0,.25)}
+.sub{color:#fff;text-shadow:0 2px 0 #1a4aa8}
+.panel{border:4px solid #1a1a1a;border-radius:12px;box-shadow:0 6px 0 #1a1a1a}
+.panel h2{color:#c8281e}.panel h3{font-size:1.05rem;color:#1d1440;margin:14px 0 6px}
+.hud{background:#1a1a1a;border-bottom:4px solid #ffd400}
+.cash::before{content:"";display:inline-block;width:15px;height:15px;border-radius:50%;background:#ffd400;border:3px solid #b8860b;margin-right:7px;vertical-align:-2px}
+.q{background:radial-gradient(circle at 10% 6%,#fff 0,#fffaf0 50%,#fff0d2 100%);border:4px solid var(--c);border-radius:36px 52px 40px 48px/48px 36px 52px 40px;box-shadow:0 8px 0 rgba(26,26,26,.28),0 18px 28px rgba(0,0,0,.18)}
+.qh{border-radius:0 0 46px 26px/0 0 24px 14px}
+.opt{border-color:#1a1a1a;box-shadow:0 4px 0 #1a1a1a;border-radius:24px 30px 26px 32px/30px 24px 32px 26px;background:#fff}
+.opt:nth-child(even){transform:rotate(-.35deg)}.opt:nth-child(odd){transform:rotate(.25deg)}
+.go{background:linear-gradient(#ff5a4a,#e52521);border:3px solid #1a1a1a;border-radius:12px;box-shadow:0 6px 0 #7a1010}
+.go.alt{background:linear-gradient(#35b6ee,#049cd8);box-shadow:0 6px 0 #02608a}
+.wheel{background:radial-gradient(circle at 35% 30%,#fff3a0,#ffd400 55%,#c99700);border:6px solid #b8860b}
+.rec{border:4px solid #1a1a1a}
+.hero{position:relative;width:130px}
+.bub{position:absolute;bottom:100%;left:50%;transform:translateX(-40%);width:190px;background:#fff;color:#1d1440;border:3px solid #1a1a1a;border-radius:14px;padding:6px 10px;font-weight:800;font-size:.85rem;margin-bottom:2px;z-index:2}
+.rg{background:none;border:0;padding:0;width:100%;cursor:pointer;margin-top:60px}
+.rg.jump svg{animation:hop .45s ease 2 alternate}
+.blks{display:flex;gap:12px;margin:6px 0 12px}
+.blk{width:58px;height:58px;border-radius:8px;border:4px solid #7a3b00;background:#ffb81c;color:#fff;font:2rem "Lilita One";text-shadow:0 3px 0 #a15d00;box-shadow:0 5px 0 #7a3b00,inset 0 0 0 3px #ffd75a;cursor:pointer;position:relative}
+.blk.hit{animation:bump .35s;background:#c9954f;color:#a8741f;text-shadow:none;box-shadow:0 5px 0 #5a2b00,inset 0 0 0 3px #d9ab6a}
+.coin{position:absolute;left:50%;top:-4px;width:16px;height:24px;margin-left:-8px;border-radius:50%;background:#ffd400;border:3px solid #b8860b;animation:coinup .7s forwards}
+@keyframes bump{40%{transform:translateY(-14px)}}
+@keyframes coinup{to{transform:translateY(-56px) scaleX(.2);opacity:0}}
+.how{min-height:3.4em;background:#fff8dc;border:3px solid #1a1a1a;border-radius:12px;padding:8px 12px;font-weight:700;margin-bottom:14px}
+.rc{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:12px;border:3px solid #1a1a1a;margin-bottom:8px}
+.rc p{margin:0;font-size:.92rem}.rc svg{flex:none;margin-top:2px}
+.rc.ok{background:#e5faee}.rc.mid{background:#fff6cf}.rc.bad{background:#ffe6e3}
+.dl{list-style:none;padding:0;margin:0}.dl li{padding:7px 0;border-bottom:2px solid #efe9ff;font-size:.93rem}
+.bd{display:inline-block;font-size:.72rem;font-weight:800;border-radius:10px;padding:1px 8px;color:#fff}
+.bd.ok{background:#1b9e56}.bd.mid{background:#c98f00}.bd.bad{background:#c23030}
+tr:nth-child(2) td,tr:nth-child(3) td,tr:nth-child(4) td{background:#fffbe8}
+.scn{margin-bottom:16px;border-radius:12px;box-shadow:0 6px 0 #1a1a1a}
+.scene{position:relative;display:flex;align-items:flex-end;justify-content:center;background:linear-gradient(#8fc2ff,#c9e8ff);border:4px solid #1a1a1a;border-radius:12px 12px 0 0;padding:14px 8px 0;overflow:hidden}
+.scene::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24px;background:#c84c0c;border-top:8px solid #43b047}
+.sr{width:96px;flex:none;position:relative;z-index:1;margin-bottom:14px}
+.free .sr{animation:run .9s ease-out}
+.gfs{width:210px;flex:none;position:relative;z-index:1;margin-bottom:10px}
+.sb{border:4px solid #1a1a1a;border-top:0;border-radius:0 0 12px 12px;padding:9px 12px;color:#fff;font-weight:800;text-align:center}
+.free .sb{background:#2f9d3a}.trap .sb{background:#c8281e}
+@keyframes run{from{transform:translateX(-90px)}}
+</style>
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<main id="app"></main>
+<script>
+var AREAS=["Financeira","Clientes","Processos","Aprendizado"];
+var S=[
+{a:"Parceria com escritório",c:"Inovação como nova combinação (Schumpeter) e forças de Porter",q:"Um escritório de contabilidade com cerca de 200 clientes PMEs propõe indicar a GF em troca de 20% de comissão e acesso imediato à plataforma. O caixa está curto e o suporte tem pouca folga. Como você estrutura o acordo?",o:[
+{t:"Piloto com 10 clientes do escritório, comissão menor no início e metas de conversão e retenção combinadas por escrito.",d:[4,8,4,6],k:1200,r:2,f:"Um piloto com regras claras é a lógica da inovação como nova combinação de recursos (Schumpeter): testa o canal sem comprometer margem e gera dados de conversão e retenção antes de ampliar."},
+{t:"Liberar a plataforma aos 200 clientes de uma vez, pagando os 20% pedidos, para ganhar escala e fechar o trimestre forte.",d:[-8,4,-8,-2],k:2500,r:0,f:"A escala rápida parece atraente, mas comissão alta e suporte para 200 clientes de uma vez pressionam margem e atendimento, além de criar dependência de um único canal (poder de barganha, nas forças de Porter)."},
+{t:"Oferecer só treinamento ao escritório, sem comissão, e esperar as indicações chegarem naturalmente ao longo do semestre.",d:[0,-2,0,2],k:200,r:1,f:"Protege o caixa, mas sem incentivo nem meta o canal gera pouco volume e quase nenhum dado para decidir. É seguro, porém lento."}]},
+{a:"Estratégia de crescimento",c:"Forças de Porter e estratégia competitiva",h:1,q:"O orçamento comercial do ano só comporta uma grande aposta. A GF enfrenta Conta Azul, Omie e Bling, que são consolidadas. Qual aposta recebe o investimento?",o:[
+{t:"Atender holdings e BPOs financeiros com demonstração de previsão de caixa por IA, aceitando um ciclo de venda mais longo.",d:[6,10,4,8],k:1500,r:2,f:"Coerente com o posicionamento da GF e com Porter: em vez de disputar preço com plataformas consolidadas, a empresa se diferencia em um nicho com necessidade clara (múltiplos CNPJs)."},
+{t:"Criar uma versão white label para escritórios contábeis e vendê-la por indicação, adaptando o produto a cada parceiro.",d:[-2,4,-2,4],k:3000,r:1,f:"É uma oportunidade citada no questionário, mas a personalização por parceiro consome a equipe. O relatório recomenda testar em pequena escala antes."},
+{t:"Lançar plano de entrada barato para todas as PMEs, com campanha ampla, para ganhar volume rápido de assinantes.",d:[-8,2,-4,-2],k:2500,r:0,f:"Coloca a GF para competir de frente onde as rivais têm mais marca e escala, e preço baixo sem controle de custos pressiona o caixa."}]},
+{a:"Retenção de clientes",c:"Balanced scorecard: perspectiva de clientes",q:"O painel mostra receita estável, mas os cancelamentos subiram e o caixa continua curto. Nenhuma causa foi confirmada ainda. O que você faz primeiro?",o:[
+{t:"Entrevistar clientes que cancelaram e cruzar os motivos com os registros de atendimento, antes de mexer em preço ou produto.",d:[6,10,6,10],k:300,r:2,f:"Decidir com evidência é a lógica do controle gerencial: só se corrige o que se entende. A investigação ainda alimenta o painel e o atendimento padronizado."},
+{t:"Oferecer desconto de renovação a quem tentar cancelar, acompanhando todo mês o impacto na receita e na retenção.",d:[-6,6,0,0],k:2000,r:1,f:"Pode segurar clientes no curto prazo e é medido, mas reduz a receita e não revela a causa do problema."},
+{t:"Reduzir custos de atendimento neste trimestre para equilibrar o caixa e reavaliar a retenção só no próximo semestre.",d:[2,-10,-6,-8],k:0,r:0,f:"Corta justamente o que sustenta o cliente e tende a agravar os cancelamentos, além de pressionar a equipe."}]},
+{a:"Painel para os sócios",c:"Controle gerencial e visão contábil",h:1,q:"Na reunião mensal, os sócios pedem um relatório de resultado. A empresa informa faturamento de R$ 540 mil por mês, mas a planilha de novembro tem 37% dos lançamentos sem data de pagamento e não separa custos de despesas. O que você leva?",o:[
+{t:"Receita, custos e despesas classificados, fluxo de caixa projetado e realizado e indicadores de clientes, em uma única página.",d:[10,4,8,4],k:0,r:2,f:"Separa faturamento de resultado e de caixa, e cobre as perspectivas financeira e de clientes do BSC com poucos números, o suficiente para decidir."},
+{t:"Um painel completo com 25 indicadores de todas as áreas, atualizado toda semana por três pessoas para não perder nada.",d:[-2,0,-6,2],k:1000,r:1,f:"Tem boa intenção, mas excesso de indicadores consome tempo e dilui o foco. Um painel enxuto tende a ser mais usado nas decisões."},
+{t:"Apenas o faturamento do mês e o número de novos clientes, dados que todos já conhecem e entendem rápido.",d:[-6,-4,-4,-4],k:0,r:0,f:"Faturamento não é lucro nem caixa. Sem custos e despesas, a rentabilidade continua invisível."}]},
+{a:"Padronização do atendimento",c:"Processos internos e perspectiva de clientes",q:"Cada atendente responde de um jeito, algumas solicitações se perdem e clientes reclamam. O caixa permite uma única medida este mês. Qual você adota?",o:[
+{t:"Documentar o fluxo de atendimento, categorizar as solicitações em um controle único e medir o tempo de resposta por categoria.",d:[2,12,10,4],k:300,r:2,f:"Cria padrão, mostra demandas recorrentes e gera indicadores de resposta e resolução, que também apontam o que pode ser automatizado depois."},
+{t:"Contratar uma plataforma de atendimento com chatbot e deixar que a própria ferramenta defina o processo ideal.",d:[-4,6,2,0],k:4000,r:1,f:"Pode ajudar, mas ferramenta sem processo definido tende a automatizar a bagunça. Faz mais sentido depois de padronizar."},
+{t:"Contratar dois atendentes experientes para absorver a demanda e deixar que eles definam a melhor forma de responder.",d:[-8,4,0,0],k:7000,r:0,f:"Mais gente sem processo padronizado multiplica a inconsistência e consome grande parte do orçamento."}]},
+{a:"Cliente grande e prazo apertado",c:"Inovação, transformação digital e LGPD",h:1,q:"Uma holding promete um contrato grande, mas exige integração bancária e previsão de caixa por IA em 30 dias. A equipe técnica tem pouca folga e ainda não há rotina de manutenção nem revisão de acessos. O que você faz?",o:[
+{t:"Propor um piloto com escopo fechado, prazo realista e regras de segurança e LGPD definidas no contrato desde o início.",d:[6,10,8,8],k:1500,r:2,f:"Equilibra inovação e capacidade técnica, como recomenda o relatório: avaliar demanda, custo e capacidade antes de assumir compromissos, mantendo o cliente por perto."},
+{t:"Recusar o contrato agora, concentrar a equipe em backup e revisão de acessos e retomar a conversa quando houver rotina.",d:[-4,-4,6,2],k:0,r:1,f:"É prudente e fortalece a base, mas abre mão de um cliente-alvo e de aprendizado. Havia um caminho que protegia e aproveitava a oportunidade."},
+{t:"Aceitar a integração e a IA no prazo de 30 dias com a equipe atual, corrigindo a segurança depois da entrega.",d:[2,-10,-10,-4],k:3000,r:0,f:"Prazo e escopo irreais, sem manutenção nem controle de acessos, elevam o risco de falhas e de incidentes com dados financeiros."}]}
+];
+var CAT=[{n:"Comercial",e:"alvo",c:"#ff4f81"},{n:"Indicadores e controles",e:"grafico",c:"#e08a00"},{n:"Atendimento e TI",e:"escudo",c:"#12a38e"}];
+var MET=[{e:"moeda",bg:"#1f9d5c",c:"#3ddc84"},{e:"clientes",bg:"#2f7fd8",c:"#3da5ff"},{e:"engrenagem",bg:"#d98200",c:"#ffb020"},{e:"capelo",bg:"#7c4de0",c:"#b07cff"}];
+var RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
+var app=document.getElementById("app");
+function mas(mood,cls){
+var arm=mood==="happy"?'<path d="M86 74 L104 38" stroke="#2a3a8f" stroke-width="13" stroke-linecap="round"/><circle cx="105" cy="34" r="8" fill="#f2b27a"/>':'<path d="M86 74 L100 110" stroke="#2a3a8f" stroke-width="13" stroke-linecap="round"/><circle cx="101" cy="114" r="7" fill="#f2b27a"/>';
+var mouth=mood==="happy"?'<path d="M46 55 Q60 72 74 55Z" fill="#7a2230"/>':mood==="sad"?'<path d="M48 65 Q60 53 72 65" stroke="#7a2230" stroke-width="3.5" fill="none" stroke-linecap="round"/>':'<path d="M50 60 Q60 65 70 60" stroke="#7a2230" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+var brow=mood==="sad"?'<path d="M38 28 L55 33 M82 28 L65 33" stroke="#3b2a20" stroke-width="3.5" stroke-linecap="round"/>':'<path d="M38 31 L55 28 M82 31 L65 28" stroke="#3b2a20" stroke-width="3.5" stroke-linecap="round"/>';
+var ex=mood==="sad"?'<path d="M42 56 Q38 66 42 70 Q47 66 42 56Z" fill="#6ec6ff"/>':mood==="happy"?'<circle cx="40" cy="55" r="5" fill="#ff8aa8" opacity=".7"/><circle cx="80" cy="55" r="5" fill="#ff8aa8" opacity=".7"/>':'';
+return '<svg class="mas '+(cls||'')+'" viewBox="0 0 120 160" role="img" aria-label="Rogério, o contador"><ellipse cx="60" cy="154" rx="34" ry="5" fill="rgba(0,0,0,.25)"/><rect x="42" y="118" width="14" height="30" fill="#1f2a52"/><rect x="64" y="118" width="14" height="30" fill="#1f2a52"/><ellipse cx="48" cy="150" rx="12" ry="5" fill="#111"/><ellipse cx="72" cy="150" rx="12" ry="5" fill="#111"/><rect x="32" y="64" width="56" height="62" rx="14" fill="#2a3a8f"/><polygon points="50,64 70,64 60,100" fill="#fff"/><polygon points="56,70 64,70 62,98 60,106 58,98" fill="#ff4f81"/><path d="M34 74 L18 108" stroke="#2a3a8f" stroke-width="13" stroke-linecap="round"/>'+arm+'<g transform="translate(2 98)"><rect width="24" height="30" rx="4" fill="#222"/><rect x="3" y="3" width="18" height="8" rx="2" fill="#7dffb0"/><g fill="#ffcf3d"><circle cx="6" cy="17" r="2"/><circle cx="12" cy="17" r="2"/><circle cx="18" cy="17" r="2"/><circle cx="6" cy="24" r="2"/><circle cx="12" cy="24" r="2"/><circle cx="18" cy="24" r="2"/></g></g><circle cx="60" cy="40" r="30" fill="#f2b27a"/><circle cx="30" cy="42" r="5" fill="#f2b27a"/><circle cx="90" cy="42" r="5" fill="#f2b27a"/><path d="M30 36 Q32 12 60 12 Q88 12 90 36 Q80 22 60 24 Q40 22 30 36Z" fill="#3b2a20"/><g fill="rgba(255,255,255,.65)" stroke="#222" stroke-width="3"><circle cx="48" cy="42" r="9"/><circle cx="72" cy="42" r="9"/></g><path d="M57 42 L63 42" stroke="#222" stroke-width="3"/><circle cx="48" cy="43" r="2.6" fill="#111"/><circle cx="72" cy="43" r="2.6" fill="#111"/>'+brow+ex+mouth+'<polygon points="22,18 60,4 98,18 60,32" fill="#1b1b2f"/><rect x="42" y="22" width="36" height="8" fill="#1b1b2f"/><path d="M96 18 L101 38" stroke="#ffcf3d" stroke-width="3"/><circle cx="101" cy="40" r="3.5" fill="#ffcf3d"/></svg>'}
+function palm(c){var l='<path d="M60 30 Q95 4 120 38 Q90 22 60 30Z"/>';return '<svg class="palm '+c+'" viewBox="0 0 120 200" fill="#2a0f4a" aria-hidden="true"><path d="M56 200 Q60 110 62 30 L68 30 Q66 110 74 200Z"/>'+l+'<g transform="translate(120 0) scale(-1 1)">'+l+'</g><g transform="rotate(-70 62 30)">'+l+'</g><g transform="rotate(70 62 30)">'+l+'</g></svg>'}
+function crown(c){return '<svg class="cr" width="26" height="20" viewBox="0 0 32 22" aria-label="coroa"><path d="M2 18 L5 5 L11 12 L16 2 L21 12 L27 5 L30 18Z" fill="'+c+'" stroke="#00000055" stroke-width="1.2"/><rect x="2" y="18" width="28" height="3" rx="1.5" fill="'+c+'"/></svg>'}
+var IG={alvo:'<circle cx="12" cy="12" r="6.5" fill="none" stroke="#fff" stroke-width="2"/><circle cx="12" cy="12" r="2.4" fill="#fff"/>',grafico:'<rect x="6" y="12" width="3" height="6" rx="1" fill="#fff"/><rect x="10.5" y="8" width="3" height="10" rx="1" fill="#fff"/><rect x="15" y="5" width="3" height="13" rx="1" fill="#fff"/>',escudo:'<path d="M12 4 L18 6.5 V12 C18 15.5 15.5 18 12 19.5 C8.5 18 6 15.5 6 12 V6.5Z" fill="#fff"/>',moeda:'<circle cx="12" cy="12" r="7" fill="none" stroke="#fff" stroke-width="2"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="800" font-family="Nunito,sans-serif" fill="#fff">$</text>',clientes:'<circle cx="9" cy="9" r="3" fill="#fff"/><circle cx="16" cy="10" r="2.5" fill="#fff"/><path d="M4 18 Q4 13 9 13 Q14 13 14 18Z M14 18 Q14 14 17 14 Q20.5 14 20.5 18Z" fill="#fff"/>',engrenagem:'<circle cx="12" cy="12" r="7.3" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="3 2.1"/><circle cx="12" cy="12" r="5" fill="#fff"/>',capelo:'<path d="M3 10 L12 5.5 L21 10 L12 14.5Z" fill="#fff"/><path d="M7 12.5 V16 Q12 19 17 16 V12.5 L12 15Z" fill="#fff"/>',estrela:'<polygon points="12,3.5 14.6,9 20.5,9.6 16,13.6 17.4,19.5 12,16.4 6.6,19.5 8,13.6 3.5,9.6 9.4,9" fill="#fff"/>',trofeu:'<path d="M8 5 H16 V10 C16 12.5 14.2 14 12 14 C9.8 14 8 12.5 8 10Z" fill="#fff"/><path d="M8 6.5 H5 Q5 11 8 11 M16 6.5 H19 Q19 11 16 11" fill="none" stroke="#fff" stroke-width="1.6"/><rect x="11" y="14" width="2" height="3" fill="#fff"/><rect x="8.5" y="17" width="7" height="2" rx="1" fill="#fff"/>',check:'<path d="M6.5 12.5 L10.5 16.5 L17.5 8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',meio:'<path d="M6.5 12 H17.5" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',alerta:'<path d="M12 6.5 V13 M12 16.6 V17" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'};
+function ico(n,bg,z){return '<svg class="ic" width="'+z+'" height="'+z+'" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="'+bg+'"/>'+IG[n]+'</svg>'}
+var fx=document.getElementById("fx"),cx=fx.getContext("2d"),P=[],raf=0,until=0,mode="",fr=0;
+function burst(x,y){var c="hsl("+Math.floor(Math.random()*360)+",100%,62%)";for(var i=0;i<70;i++){var a=Math.random()*6.28,s=1.5+Math.random()*4.5;P.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:70+Math.random()*30,c:c,k:"s"})}}
+function conf(){P.push({x:Math.random()*fx.width,y:-10,vx:Math.random()*2-1,vy:2+Math.random()*3,l:400,c:"hsl("+Math.floor(Math.random()*360)+",90%,60%)",k:"c",r:Math.random()*6})}
+function drop(){P.push({x:Math.random()*fx.width,y:-10,vx:-1,vy:9+Math.random()*4,l:200,c:"#a9c8ea",k:"r"})}
+function sadp(){P.push({x:Math.random()*fx.width,y:-20,vx:0,vy:1.5+Math.random()*1.5,l:500,k:"e",t:Math.floor(Math.random()*3)})}
+function tick(t){cx.clearRect(0,0,fx.width,fx.height);fr++;
+if(t<until){if(mode!=="sad"&&fr%20===0)burst(fx.width*(.15+Math.random()*.7),fx.height*(.12+Math.random()*.4));if(mode==="win"){conf();conf()}if(mode==="sad"){if(fr%3===0)drop();if(fr%40===0)sadp()}}
+P=P.filter(function(p){p.l--;p.x+=p.vx;p.y+=p.vy;
+if(p.k==="s"){p.vy+=.05;cx.globalAlpha=Math.max(0,p.l/90);cx.fillStyle=p.c;cx.fillRect(p.x,p.y,4,4)}
+else if(p.k==="c"){p.r+=.1;cx.globalAlpha=1;cx.fillStyle=p.c;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillRect(-5,-2,10,4);cx.restore()}
+else if(p.k==="r"){cx.globalAlpha=.6;cx.strokeStyle=p.c;cx.lineWidth=2;cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(p.x-3,p.y-14);cx.stroke()}
+else{cx.globalAlpha=.9;var x=p.x,y=p.y;if(p.t===0){cx.fillStyle="#d9453a";cx.beginPath();cx.arc(x,y,16,0,6.28);cx.fill();cx.strokeStyle="#fff";cx.lineWidth=3;cx.lineCap="round";cx.beginPath();cx.moveTo(x-8,y-6);cx.lineTo(x-2,y);cx.lineTo(x+2,y-3);cx.lineTo(x+8,y+6);cx.stroke()}else if(p.t===1){cx.fillStyle="#ffc83d";cx.beginPath();cx.arc(x,y,15,0,6.28);cx.fill();cx.fillStyle="#7a4a00";cx.font="800 18px Nunito,sans-serif";cx.textAlign="center";cx.fillText("$",x,y+6)}else{cx.fillStyle="#6ec6ff";cx.beginPath();cx.moveTo(x,y-14);cx.quadraticCurveTo(x+14,y+4,x,y+14);cx.quadraticCurveTo(x-14,y+4,x,y-14);cx.fill()}}
+return p.l>0&&p.y<fx.height+40});cx.globalAlpha=1;
+if(t<until||P.length)raf=requestAnimationFrame(tick);else{raf=0;cx.clearRect(0,0,fx.width,fx.height)}}
+function play(k){if(RM)return;fx.width=innerWidth;fx.height=innerHeight;mode=k;fr=0;until=performance.now()+(k==="win"?8000:k==="fire"?6000:5000);if(!raf)raf=requestAnimationFrame(tick)}
+var PN="",KEY="gf_rank_v1",MEM=[],st;
+function fresh(){return{i:0,cash:20000,m:[50,50,50,50],good:0,pts:0,log:[]}}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function loadR(){try{var r=JSON.parse(localStorage.getItem(KEY));if(r&&r.length)return r}catch(e){}return MEM}
+function saveR(r){MEM=r;try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}}
+function sh(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function clamp(v){return Math.max(0,Math.min(100,v))}
+function fmt(n){return "R$ "+n.toLocaleString("pt-BR")}
+function intro(){
+document.body.classList.remove("sadmode");
+app.innerHTML='<div class="sky"><i class="cl c1"></i><i class="cl c2"></i><i class="cl c3"></i></div><h1 class="logo">PAINEL GF</h1><p class="sub">O jogo da gestão · GF Innovation &amp; Tech Development</p>'+
+'<div class="row"><div class="hero"><div class="bub" id="bub">Toque em mim para uma dica!</div><button class="rg" id="rg" aria-label="Rogério: toque para ouvir uma dica">'+mas("neutral","float")+'</button></div><div class="wheel"><i>GF</i></div></div>'+
+'<div class="panel"><h2>Você é a administração da GF!</h2><p>Tome <b>6 decisões</b> com <b>R$ 20.000</b> de caixa. Cada escolha mexe no caixa e em 4 indicadores. A nota vai de <b>0 a 1000</b>, e acima de 600 tem festa!</p><p class="mut">Bata nos blocos para ver como jogar:</p><div class="blks"><button class="blk" data-n="0" aria-label="Passo 1">?</button><button class="blk" data-n="1" aria-label="Passo 2">?</button><button class="blk" data-n="2" aria-label="Passo 3">?</button></div><div class="how" id="how">Toque em um bloco ?</div>'+
+'<label for="pn"><b>Nome do jogador</b></label><input id="pn" maxlength="24" placeholder="Digite seu nome" autocomplete="off" value="'+esc(PN)+'"><button class="go" id="b0">Começar</button></div>'+
+'<p class="mut ctr">Teorias Organizacionais · Ciências Contábeis · Universidade São Judas Tadeu</p>';
+var pn=document.getElementById("pn");function go(){var v=pn.value.trim();if(!v){pn.focus();pn.placeholder="Digite um nome para começar";return}PN=v;st=fresh();round()}
+document.getElementById("b0").onclick=go;pn.onkeydown=function(e){if(e.key==="Enter")go()};
+var HOW=["1. Leia a situação: cada rodada traz um problema real da GF Innovation & Tech.","2. Escolha 1 de 3 opções: uma é a melhor, outra é razoável e outra é fraca. O custo só aparece depois.","3. Aprenda: veja o motivo da nota, a teoria da disciplina e acompanhe os 4 indicadores."];
+var TIPS=["Faturamento não é lucro! Olhe custos e caixa.","Planejar antes de gastar poupa o caixa.","O que não se mede não se melhora.","Dados de clientes pedem cuidado: LGPD!","Testar em pequena escala reduz o risco."],ti=0;
+var rg=document.getElementById("rg"),bub=document.getElementById("bub"),how=document.getElementById("how");
+rg.onclick=function(){bub.textContent=TIPS[ti++%TIPS.length];rg.classList.remove("jump");void rg.offsetWidth;rg.classList.add("jump")};
+app.querySelectorAll(".blk").forEach(function(bk){bk.onclick=function(){how.textContent=HOW[+bk.dataset.n];bk.classList.remove("hit");void bk.offsetWidth;bk.classList.add("hit");bk.insertAdjacentHTML("beforeend",'<i class="coin"></i>');setTimeout(function(){var c=bk.querySelector(".coin");if(c)c.remove()},700)}});
+pn.focus()}
+function hud(){var h='<div class="hud"><div class="top"><span>'+esc(PN)+' · '+Math.min(st.i+1,S.length)+'/'+S.length+'</span><span class="cash">'+fmt(st.cash)+'</span></div><div class="g">';
+for(var k=0;k<4;k++)h+='<div class="m">'+ico(MET[k].e,MET[k].bg,16)+' '+AREAS[k]+' '+st.m[k]+'<div class="t"><div class="f" style="width:'+st.m[k]+'%;background:'+MET[k].c+'"></div></div></div>';
+return h+'</div></div>'}
+function round(){
+var s=S[st.i],ct=CAT[Math.floor(st.i/2)],opts=sh(s.o);
+var h=hud()+'<div class="q" style="--c:'+ct.c+'"><div class="qh">'+ico(ct.e,ct.c,26)+' '+ct.n+'</div><div class="qb"><div class="qm" id="qm">'+mas("neutral","float")+'</div><div>'+(s.h?'<span class="tag" style="background:#ffd84a;color:#5a3a00">'+ico("estrela","#b87400",14)+' Difícil</span> ':'')+'<span class="tag">'+s.c+'</span><h2>'+s.q+'</h2></div></div><div class="ops">';
+opts.forEach(function(o,n){h+='<button class="opt" data-n="'+n+'"><em>'+"ABC".charAt(n)+'</em><span>'+o.t+'</span></button>'});
+app.innerHTML=h+'</div><div id="fb"></div><div id="stamp"></div></div>';
+var bs=app.querySelectorAll(".opt");
+bs.forEach(function(b){b.onclick=function(){pick(opts,+b.dataset.n,bs)}})}
+function pick(opts,n,bs){
+var o=opts[n];bs.forEach(function(b){b.disabled=true});
+opts.forEach(function(x,i){if(x.r===2)bs[i].classList.add("ok")});if(o.r<2)bs[n].classList.add(o.r?"mid":"bad");
+st.cash-=o.k;var sum=0;for(var k=0;k<4;k++){st.m[k]=clamp(st.m[k]+o.d[k]);sum+=o.d[k]}
+if(o.r===2)st.good++;st.pts+=o.r*52;st.log.push({a:S[st.i].a,r:o.r});
+var last=st.i===S.length-1;
+document.getElementById("qm").innerHTML=mas(o.r===2?"happy":o.r===1?"neutral":"sad",o.r===2?"hop":o.r===1?"float":"shake");
+document.getElementById("stamp").innerHTML='<div class="stamp '+["no","mid","yes"][o.r]+'">'+["OPS!","RAZOÁVEL","ÓTIMO!"][o.r]+'</div>';
+document.getElementById("fb").innerHTML='<div class="fb '+["low","","good"][o.r]+'"><b>'+["Escolha fraca.","Escolha razoável, mas existe uma melhor.","Melhor escolha: alinhada ao plano de ação."][o.r]+'</b><p>'+o.f+'</p><p class="mut">Custo: '+(o.k?fmt(o.k):"sem custo externo")+'</p></div><div style="padding:0 14px 14px"><button class="go" id="nx">'+(last?"Ver resultado":"Próxima decisão")+'</button></div>';
+document.querySelector(".hud").outerHTML=hud();
+var nx=document.getElementById("nx");nx.focus();
+nx.onclick=function(){if(st.cash<0||st.m.some(function(v){return v<=0}))return end(true);if(last)return end(false);st.i++;round()}}
+function rk(R,me){var h='<div class="panel"><h2>Ranking dos jogadores</h2><div class="sw"><table><tr><th>Posição</th><th>Jogador</th><th>Pontos</th></tr>';
+var cc=["#ffc400","#c3ccd8","#cd7f32"];
+R.slice(0,10).forEach(function(r,i){h+='<tr'+(r===me?' class="me"':'')+'><td>'+(i<3?crown(cc[i]):'')+(i+1)+'º</td><td>'+esc(r.n)+'</td><td>'+r.s+'</td></tr>'});
+return h+'</table></div><p class="mut">Ranking salvo neste aparelho. Nota: por decisão, 104 pontos na melhor escolha e 52 na razoável; mais até 200 pelos indicadores e até 170 pelo caixa restante.</p></div>'}
+function scene(win){
+var gf='<g><rect x="62" y="86" width="54" height="54" rx="16" fill="#7c4de0" stroke="#1a1a1a" stroke-width="3"/><path d="M68 86 L72 68 L82 78 L89 64 L96 78 L106 68 L110 86Z" fill="#ffd400" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/><circle cx="79" cy="102" r="5.5" fill="#fff"/><circle cx="99" cy="102" r="5.5" fill="#fff"/><circle cx="79" cy="103" r="2.5" fill="#111"/><circle cx="99" cy="103" r="2.5" fill="#111"/>'+(win?'<path d="M80 111 Q89 122 98 111Z" fill="#7a2230"/>':'<path d="M80 119 Q89 110 98 119" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M75 109 Q71 117 75 120 Q79 117 75 109Z" fill="#6ec6ff"/>')+'<text x="89" y="135" text-anchor="middle" font-size="12" font-family="Lilita One,sans-serif" fill="#fff">GF</text><ellipse cx="78" cy="142" rx="9" ry="4" fill="#111"/><ellipse cx="100" cy="142" rx="9" ry="4" fill="#111"/></g>';
+var arms=win?'<g stroke="#7c4de0" stroke-width="8" stroke-linecap="round"><line x1="62" y1="100" x2="48" y2="76"/><line x1="116" y1="100" x2="130" y2="76"/></g><circle cx="47" cy="73" r="5" fill="#f2b27a"/><circle cx="131" cy="73" r="5" fill="#f2b27a"/>':'<circle cx="55" cy="112" r="5" fill="#f2b27a"/><circle cx="123" cy="112" r="5" fill="#f2b27a"/>';
+var heart='<path d="M0 -3 C-5 -10 -14 -2 0 9 C14 -2 5 -10 0 -3Z" fill="#ff4f81"/>';
+var extra=win?'<g transform="translate(89 44)">'+heart+'</g><g transform="translate(40 58) scale(.7)">'+heart+'</g><g transform="translate(138 54) scale(.7)">'+heart+'</g><g stroke="#333" stroke-width="4" stroke-linecap="round"><line x1="8" y1="150" x2="34" y2="141"/><line x1="12" y1="157" x2="40" y2="149"/></g>':'<g stroke="#333" stroke-width="4" stroke-linecap="round"><line x1="60" y1="62" x2="60" y2="146"/><line x1="74" y1="62" x2="74" y2="146"/><line x1="88" y1="62" x2="88" y2="146"/><line x1="102" y1="62" x2="102" y2="146"/><line x1="116" y1="62" x2="116" y2="146"/></g><rect x="44" y="58" width="92" height="8" rx="3" fill="#555"/><rect x="80" y="124" width="20" height="16" rx="3" fill="#ffd400" stroke="#1a1a1a" stroke-width="2"/><path d="M84 124 V118 a6 6 0 0 1 12 0 V124" fill="none" stroke="#1a1a1a" stroke-width="3"/>';
+var castle='<g stroke="#1a1a1a" stroke-width="3"><rect x="140" y="56" width="56" height="86" fill="#9aa3b5"/><rect x="140" y="46" width="12" height="12" fill="#9aa3b5"/><rect x="159" y="46" width="12" height="12" fill="#9aa3b5"/><rect x="178" y="46" width="12" height="12" fill="#9aa3b5"/></g><path d="M155 142 V116 Q168 102 181 116 V142Z" fill="#3b2a20"/><line x1="168" y1="46" x2="168" y2="20" stroke="#1a1a1a" stroke-width="3"/><path d="M168 20 L188 27 L168 34Z" fill="#e52521"/>';
+return '<div class="scn '+(win?"free":"trap")+'"><div class="scene"><div class="sr">'+mas(win?"happy":"sad",win?"hop":"shake")+'</div><svg class="gfs" viewBox="0 0 200 170" role="img" aria-label="'+(win?"A GF foi resgatada":"A GF está presa")+'">'+castle+gf+arms+extra+'</svg></div><div class="sb">'+(win?"Você resgatou a GF! Suas decisões libertaram a empresa.":"A GF ficou presa no castelo! Melhore as decisões para libertá-la.")+'</div></div>'}
+function report(){
+var L=st.log,r=function(i){return L[i]?L[i].r:0},conc=(r(0)+r(1))/2,c=st.cash,m=st.m;
+var cards=[
+conc<.75?["bad","Perde espaço na concorrência","Suas decisões comerciais deixaram a GF competindo de igual para igual com Conta Azul, Omie e Bling, sem diferencial."]:conc<1.75?["mid","Mantém a posição na concorrência","A GF segue no jogo, mas ainda sem um diferencial forte frente às plataformas consolidadas."]:["ok","Ganha espaço na concorrência","O nicho e o canal testado em piloto deram à GF um diferencial frente às grandes."],
+(c<5000||m[0]<45)?["bad","Caixa no vermelho","Gastos altos e pouco controle deixaram o caixa em "+fmt(c)+" e o resultado frágil."]:c<12000?["mid","Caixa apertado","Sobraram "+fmt(c)+": pouco para investir em novas frentes."]:["ok","Caixa saudável","Sobraram "+fmt(c)+" e a empresa tem fôlego para crescer com controle."],
+m[1]<50?["bad","Clientes insatisfeitos","Atendimento e retenção ficaram fracos: o risco é de mais cancelamentos."]:m[1]<70?["mid","Clientes estáveis","A base se mantém, mas há espaço para melhorar atendimento e retenção."]:["ok","Clientes fidelizados","Atendimento padronizado e retenção bem tratada aumentam a confiança dos clientes."],
+[["bad","Gestão às cegas","Sem custos e despesas separados, os sócios decidem sem enxergar o resultado."],["mid","Indicadores sem foco","Há números, mas não o suficiente para decidir com rapidez."],["ok","Gestão com clareza","O painel enxuto mostra resultado, caixa e clientes em uma página."]][r(3)],
+[["bad","Risco com dados e tecnologia","A pressa e a falta de rotina de segurança elevam o risco de falhas e de incidentes (LGPD)."],["mid","Dados protegidos, oportunidade perdida","A base ficou segura, mas a GF abriu mão de um cliente-alvo."],["ok","Dados protegidos","Segurança e LGPD definidas desde o início sustentam a confiança do cliente."]][r(5)]];
+var ic={ok:ico("check","#1b9e56",26),mid:ico("meio","#d9a400",26),bad:ico("alerta","#c23030",26)};
+var h='<div class="panel"><h2>Relatório da sua gestão</h2>';
+cards.forEach(function(k){h+='<div class="rc '+k[0]+'">'+ic[k[0]]+'<div><b>'+k[1]+'</b><p>'+k[2]+'</p></div></div>'});
+return h+'</div>'}
+function end(broke){
+st.i=S.length;var tot=st.m.reduce(function(a,b){return a+b},0);
+var raw=st.pts+Math.round(tot/4*2)+Math.round(Math.max(0,st.cash)/20000*170);if(broke)raw=Math.round(raw/2);
+var sc=Math.max(0,Math.min(1000,raw));
+var R=loadR().slice();var rec=R.length>0&&sc>R[0].s;
+var me={n:PN,s:sc,t:Date.now()};R.push(me);R.sort(function(a,b){return b.s-a.s||a.t-b.t});saveR(R);
+var pos=R.indexOf(me)+1,win=sc>600;
+var tit=sc>=850?"Contador lendário!":win?"Gestor em alta!":sc>=300?"Aprendiz de contabilidade":"Balanço no vermelho";
+var tx=broke?"O caixa acabou ou um indicador chegou a zero antes da última decisão. Sem controle, nem um faturamento de R$ 540 mil por mês garante caixa: em novembro, 37% dos lançamentos estavam sem data de pagamento.":st.pts>=480?"Você seguiu quase todo o plano de ação: ações de baixo custo, indicadores e rotina de controle antes de ampliar canais ou funcionalidades.":st.pts>=300?"Você acertou boa parte das decisões, mas algumas escolhas custaram caixa ou deixaram lacunas de controle.":"Muitas decisões ficaram fora do plano. A função de controle segue frágil e o crescimento depende de sorte.";
+document.body.classList.toggle("sadmode",!win);
+var h=(rec?'<div class="rec"><span class="tro">'+ico("trofeu","#e08a00",42)+'</span>NOVO RECORDE DO RANKING!</div>':'')+'<h1 class="logo" style="font-size:clamp(2rem,8vw,3.2rem)">'+tit+'</h1>'+
+'<div class="row"><div><div class="ctr mut" style="color:#fff">'+esc(PN)+'</div><div class="big" id="sc">0</div><div class="ctr">de 1000 pontos</div></div></div>'+
+scene(win)+'<div class="panel"><p><b>'+pos+'º lugar no ranking.</b> '+tx+'</p><p><b>Melhores escolhas:</b> '+st.good+' de '+S.length+' · <b>Pontos das decisões:</b> '+st.pts+' · <b>Caixa restante:</b> '+fmt(st.cash)+'</p><div class="g">';
+for(var k=0;k<4;k++)h+='<div class="m">'+ico(MET[k].e,MET[k].bg,16)+' '+AREAS[k]+' '+st.m[k]+'<div class="t"><div class="f" style="width:'+st.m[k]+'%;background:'+MET[k].c+'"></div></div></div>';
+h+='</div></div>'+rk(R,me)+report()+'<p class="mut ctr">Cenários baseados no relatório de diagnóstico da GF Innovation &amp; Tech Development. Valores e prazos são sugestões acadêmicas do grupo.</p><button class="go" id="rs">Jogar de novo</button><button class="go alt" id="hm">Voltar ao início</button>';
+app.innerHTML=h;window.scrollTo(0,0);
+document.getElementById("rs").onclick=function(){document.body.classList.remove("sadmode");st=fresh();round()};
+document.getElementById("hm").onclick=function(){PN="";intro()};
+var el=document.getElementById("sc");
+function done(){if(!document.body.contains(el))return;play(rec?"win":win?"fire":"sad")}
+if(RM){el.textContent=sc;done()}else{var t0=performance.now();(function f(t){var p=Math.min(1,(t-t0)/1600);el.textContent=Math.round(sc*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f);else done()})(t0)}}
+function resetAll(){
+try{localStorage.removeItem(KEY)}catch(e){}
+MEM=[];P=[];until=0;mode="";fr=0;
+cx.clearRect(0,0,fx.width,fx.height);
+PN="";document.body.classList.remove("sadmode");
+st=fresh();intro();window.scrollTo(0,0);
+var o=document.getElementById("rstmsg");if(o)o.remove();
+var d=document.createElement("div");d.id="rstmsg";d.setAttribute("role","status");
+d.style.cssText="position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:60;background:#1a1a1a;color:#ffd400;border:3px solid #ffd400;border-radius:12px;padding:10px 18px;font:1rem 'Lilita One',sans-serif";
+d.textContent="Jogo e ranking resetados";document.body.appendChild(d);setTimeout(function(){d.remove()},2200)}
+document.addEventListener("keydown",function(e){
+if((e.ctrlKey||e.metaKey)&&(e.code==="Digit1"||e.code==="Numpad1"||e.key==="1")){e.preventDefault();resetAll()}});
+st=fresh();intro();
+</script>
+</body>
+</html>
